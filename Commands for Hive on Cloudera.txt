@@ -1,0 +1,60 @@
+Commands for Hive
+
+++++++++++++++++++++++TO START CLOUDERA MANAGER +++++++++++++++++++++++
+sudo /home/cloudera/cloudera-manager --force --express     
+
+++++++++++++++++++++++++TABLE CREATION +++++++++++++++++++++
+
+create table ytdata(vid_id string, uploader_name int,
+interval_fromytcreated_toupload int, catagory string, video_length
+int, no_of_views int, ratings float, no_of_ratings int, no_of_comments
+int) row format delimited fields terminated by ',' stored as textfile
+location '/user/cloudera/ytdata'
+
+++++++++++++++++++++++++++++++++TOTAL VIDEOS COUNT++++++++++++++++++++++++++++++++
+select count(*) from ytdata;
+
+++++++++++++++++++++++++++++++++VIDEOS ABOVE RATING THRESHHOLD - 4.7++++++++++++++++++++++++++++++++
+select count(*) from ytdata where ratings > 4.7;
+
+
+++++++++++++++++++++++++++++++++ANALYSE RATINGS BASED ON CATEGORIES ++++++++++++++++++++++++++++++++
+ select category,avg(ratings) as average from ytdata group by category order by average;
+
+
+
+++++++++++++++++++++++++++++++++ Are longer Videos More Popular or shorter ones? ++++++++++++++++++++++++++++++++
+select "longer_videos_rating",avg(ratings) as longer_videos_avg_ratings from ytdata  where video_length > 200;
+select "Shorter Videos Ratings",avg(ratings) as longer_videos_avg_ratings from ytdata  where video_length < 200;
+
+
++++++++++++++++++++++++++++++++++++++Top 5 Videos with highest ratings per person+++++++++++++++++++++++++++++++++++++++++
+select vid_id, (ratings/no_of_ratings) as rating_per_person from ytdata order by rating_per_person desc  limit 5;
+
+
+++++++++++++++++++++++++++++++++++++MAXIMUM VIEWS PER CATEGORY++++++++++++++++++++++++++++++++++++++++++++
+
+select  category ,max(no_of_views) as max_views  from ytdata group  by category;
+
+++++++++++++++++++++++++++++++++++++MINIMUM VIEWS PER CATEGORY++++++++++++++++++++++++++++++++++++++++++++
+
+select  category ,min(no_of_views) as min_views  from ytdata group  by category;
+
++++++++++++++++++++++++++++++++++++++Video Engagement Check++++++++++++++++++++++++++++++++++++++++++++++++
+ select vid_id,( (no_of_ratings+no_of_comments)/no_of_views) as engagement_value  from ytdata order by engagement_value desc limit 3 ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++Top 10 Video Uploaders++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+select uploader_name,count(*)as count from ytdata group by uploader_name order by count desc limit 10;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++Oldest  10 Videos uploaded++++++++++++++++++++++++++++++++++++++++++++++
+select vid_id,interval_fromytcreated_toupload from ytdata where  interval_fromytcreated_toupload > 0 order by interval_fromytcreated_toupload limit 10;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++Latest 10 Videos uploaded++++++++++++++++++++++++++++++++++++++++++++++
+select vid_id,interval_fromytcreated_toupload from ytdata where  interval_fromytcreated_toupload > 0 order by interval_fromytcreated_toupload  desc limit 10;
+
+
++++++++++++++++++++++++++++++++++++++++Number of videos in comedycategory++++++++++++++++++++++++++++++++++++++++++++++
+select count(*) from ytdata where category='Comedy';
+
++++++++++++++++++++++++++++++++++++++++Total comments on EvilSquirrelPictures++++++++++++++++++++++++++++++++++++++++++++++
+select count(no_of_comments) from ytdata where uploader_name = 'EvilSquirrelPictures';
